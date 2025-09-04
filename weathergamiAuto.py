@@ -1,4 +1,4 @@
-# Written By Jared Rennie 
+# Written By Jared Rennie, modified by Michael Gonzalez
 
 # Import packages
 import json,requests,sys
@@ -11,6 +11,7 @@ from datetime import datetime, timedelta
 now = datetime.now()
 yesterday = now - timedelta(days = 1)
 twoDaysAgo = now - timedelta(days = 2)
+threeDaysAgo = now - timedelta(days = 3)
 
 stationList = ["KBIS", "KMOT", "KDIK", "KXWA"]
 
@@ -40,6 +41,32 @@ for i in range(0, len(stationList)):
     acisPandasYesterday = pd.DataFrame(acisData['data'], columns=['Date','Tmax','Tmin'])
     ydayTmax=acisPandasYesterday.iloc[[0]]['Tmax'].values[0]
     ydayTmin=acisPandasYesterday.iloc[[0]]['Tmin'].values[0]
+    
+    # IN CASE THERE'S NO DATA FOR YESTERDAY YET:
+    #=================================================  
+    if ydayTmax == "M" or ydayTmin == "M":
+        # Retrieve yesterday's high/low      
+        acis_url = 'http://data.rcc-acis.org/StnData'
+        payload = {
+        "output": "json",
+        "params": {"elems":[{"name":"maxt","interval":"dly","prec":1},{"name":"mint","interval":"dly","prec":1}],
+                "sid":stationID,
+                "date":twoDaysAgoString
+                } 
+        }
+        # Make Request
+        try:
+            r = requests.post(acis_url, json=payload,timeout=3)
+            acisData = r.json()
+        except Exception as e:
+            sys.exit('\nSomething Went Wrong With Accessing API after 3 seconds, Try Again')   
+        
+        acisPandasYesterday = pd.DataFrame(acisData['data'], columns=['Date','Tmax','Tmin'])
+        ydayTmax=acisPandasYesterday.iloc[[0]]['Tmax'].values[0]
+        ydayTmin=acisPandasYesterday.iloc[[0]]['Tmin'].values[0]    
+
+        twoDaysAgoString = threeDaysAgo.strftime("%Y-%m-%d")
+    #=================================================  
     
     # Read in Arguments 
     #if len(sys.argv) < 4:
