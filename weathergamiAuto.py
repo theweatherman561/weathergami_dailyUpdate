@@ -207,7 +207,7 @@ for i in range(0, len(stationList)):
     print("PLOTTING")
     
     # Set up the scatter plot
-    fig, axf = plt.subplots(figsize=(10, 8), edgecolor='white', facecolor='white', dpi=dpi)
+    fig, axf = plt.subplots(figsize=(10, 8), edgecolor='white', facecolor='black', dpi=dpi)
     plt.style.use("dark_background")
     
     # Add grid lines
